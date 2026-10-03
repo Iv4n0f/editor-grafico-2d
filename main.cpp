@@ -315,14 +315,11 @@ void dibujarPoligono(Poligono &pol, float r, float g, float b) {
 void display() {
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // 1) Rellenar todos los poligonos que tengan relleno activo
+  // Dibujar cada poligono: primero su relleno y luego su contorno (orden por capas)
   for (int i = 0; i < (int)poligonos.size(); i++) {
     if (poligonos[i].cerrado && poligonos[i].relleno)
       rellenarPoligono(poligonos[i]);
-  }
 
-  // 2) Dibujar contornos
-  for (int i = 0; i < (int)poligonos.size(); i++) {
     if (i == poligonoActivo)
       dibujarPoligono(poligonos[i], 1.0f, 0.0f, 0.0f); // activo = rojo
     else
