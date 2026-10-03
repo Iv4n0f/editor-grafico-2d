@@ -3,16 +3,20 @@
 // Rasterizacion (Bresenham) + Transformaciones homogeneas + Relleno ET/EAT
 // =====================================================================
 // Controles:
-//   Click izquierdo  -> agregar vertice
-//   Click derecho    -> cerrar poligono
-//   1, 2, 3...       -> seleccionar poligono activo
-//   D / I            -> rotar 5 grados derecha / izquierda
-//   S / s            -> escalar +10% / -10%
-//   Flechas          -> trasladar (5 px por pulsacion, 20 con Shift)
-//   R/r, G/g, B/b    -> ajustar canal de color (+/- 0.2) y rellenar
-//   v / V            -> vaciar relleno del activo (modo alambrico)
-//   C                -> limpiar todo
-//   ESC              -> salir
+//   Modo Dibujo:
+//     Click izquierdo  -> agregar vertice al poligono en construccion
+//     Click derecho    -> cerrar poligono en construccion (minimo 3 vertices)
+//   Modo Seleccion (sin vertices en construccion):
+//     Click derecho    -> seleccionar poligono bajo el cursor (prioriza frontal)
+//   Transformacion y color (poligono activo):
+//     D / I            -> rotar 5 grados derecha / izquierda
+//     S / s            -> escalar +10% / -10%
+//     Flechas          -> trasladar (5 px por pulsacion)
+//     R/r, G/g, B/b    -> ajustar canal de color (+/- 0.2) y rellenar
+//     v / V            -> vaciar relleno del activo (modo alambrico)
+//   General:
+//     C                -> limpiar todo
+//     ESC              -> salir
 // =====================================================================
 
 #include <GL/glut.h>
@@ -42,7 +46,7 @@ struct Poligono {
   bool relleno;
   float R, G, B; // color de relleno del poligono
 
-  Poligono() : cerrado(false), relleno(false), R(1.0f), G(0.0f), B(0.0f) {}
+  Poligono() : cerrado(false), relleno(false), R(0.0f), G(0.0f), B(0.0f) {}
 };
 
 vector<Poligono> poligonos;
@@ -344,6 +348,28 @@ void display() {
 }
 
 // =====================================================================
+//  POINT-IN-POLYGON (Algoritmo Ray Casting / PNPoly)
+//  Determina si el punto (x, y) del mouse cae dentro de un poligono cerrado
+// =====================================================================
+bool puntoEnPoligono(float x, float y, const Poligono &pol) {
+  int n = pol.P.size();
+  if (n < 3)
+    return false;
+
+  bool dentro = false;
+  for (int i = 0, j = n - 1; i < n; j = i++) {
+    float xi = pol.P[i].x, yi = pol.P[i].y;
+    float xj = pol.P[j].x, yj = pol.P[j].y;
+
+    if (((yi > y) != (yj > y)) &&
+        (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      dentro = !dentro;
+    }
+  }
+  return dentro;
+}
+
+// =====================================================================
 //  MOUSE
 // =====================================================================
 void mouse(int button, int state, int x, int y) {
@@ -377,8 +403,22 @@ void mouse(int button, int state, int x, int y) {
 
     Poligono &pol = poligonos[poligonoActual];
 
+    // MODO SELECCION: No hay vertices en el poligono actual (no se esta dibujando)
+    if (pol.P.empty()) {
+      for (int i = (int)poligonos.size() - 1; i >= 0; i--) {
+        if (poligonos[i].cerrado && puntoEnPoligono((float)x, (float)y, poligonos[i])) {
+          poligonoActivo = i;
+          cout << "Poligono " << i + 1 << " seleccionado (activo)." << endl;
+          glutPostRedisplay();
+          break;
+        }
+      }
+      return;
+    }
+
+    // MODO DIBUJO: Se estan trazando vertices e intentamos cerrar el poligono
     if (pol.P.size() < 3) {
-      cout << "Se necesitan al menos 3 vertices." << endl;
+      cout << "Se necesitan al menos 3 vertices para cerrar." << endl;
       return;
     }
 
@@ -387,8 +427,8 @@ void mouse(int button, int state, int x, int y) {
 
     Poligono nuevo;
     poligonos.push_back(nuevo);
-    poligonoActual = poligonos.size() - 1;
     poligonoActivo = poligonoActual;
+    poligonoActual = poligonos.size() - 1;
 
     glutPostRedisplay();
   }
@@ -404,15 +444,6 @@ void movimiento(int x, int y) {
 //  TECLADO
 // =====================================================================
 void teclado(unsigned char tecla, int x, int y) {
-  // -------- Seleccion de poligono con 1,2,3,...,9 --------
-  if (tecla >= '1' && tecla <= '9') {
-    int idx = tecla - '1';
-    if (idx < (int)poligonos.size() && poligonos[idx].cerrado) {
-      poligonoActivo = idx;
-      cout << "Poligono " << idx + 1 << " activo." << endl;
-    }
-  }
-
   // -------- Rotar --------
   if ((tecla == 'd' || tecla == 'D') && poligonos[poligonoActivo].cerrado)
     rotar(poligonos[poligonoActivo], -5.0f);

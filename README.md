@@ -26,9 +26,9 @@ g++ -std=c++17 main.cpp -o main -lglut -lGLU -lGL
 
 | Acción / Control | Entrada | Descripción |
 | :--- | :--- | :--- |
-| **Agregar vértice** | `Clic Izquierdo` | Agrega un punto al polígono en construcción. |
-| **Cerrar polígono** | `Clic Derecho` | Cierra el polígono actual (mínimo 3 vértices) y prepara el siguiente. |
-| **Seleccionar polígono** | Teclas `1`, `2`, ..., `9` | Cambia el polígono activo para transformarlo o colorearlo. |
+| **[Modo Dibujo] Agregar vértice** | `Clic Izquierdo` | Agrega un nuevo vértice al polígono en construcción. |
+| **[Modo Dibujo] Cerrar polígono** | `Clic Derecho` | Cierra el polígono en construcción (mínimo 3 vértices) y lo deja activo. |
+| **[Modo Selección] Seleccionar polígono** | `Clic Derecho` | Cuando no hay dibujo activo, selecciona el polígono bajo el cursor (prioriza el más frontal). |
 | **Rotación** | Teclas `d` / `D` | Rota el polígono activo $-5^\circ$ (sentido horario) sobre su centroide. |
 | | Teclas `i` / `I` | Rota el polígono activo $+5^\circ$ (sentido antihorario) sobre su centroide. |
 | **Escalamiento** | Tecla `S` | Incrementa el tamaño del polígono activo en un $+10\%$ respecto a su centroide. |
@@ -67,6 +67,11 @@ Todo el renderizado se realiza mediante **rasterizado por software (manual)**: n
   1. **Edge Table (ET):** Almacena las aristas no horizontales indexadas por su $y_{\min}$, guardando $y_{\max}$, la coordenada $x$ inicial y la pendiente inversa $\text{invM} = \frac{\Delta x}{\Delta y}$.
   2. **Active Edge Table (EAT):** Mantiene las aristas que intersectan con la línea de barrido actual $y$. En cada fila se retiran las aristas cuyo $y_{\max} < y$, se agregan las nuevas desde la ET, se ordenan de menor a mayor en $x$ y se colorean los píxeles entre pares consecutivos de intersecciones $[x_1, x_2]$ con `glVertex2i(x, y)`.
   3. **Actualización incremental:** Se suma $\text{invM}$ a cada arista activa para el siguiente renglón $y + 1$.
+
+### 4. Detección de Punto en Polígono (Ray Casting / Teorema de la Curva de Jordan)
+* **Función:** `puntoEnPoligono(float x, float y, const Poligono &pol)`
+* **Objetivo:** Identificar si el clic del mouse cayó dentro de un polígono cerrado para seleccionarlo interactivamente.
+* **Técnica:** Comparte el mismo principio de paridad del algoritmo Scan-Line. Lanza un rayo horizontal imaginario desde $(x, y)$ hacia el infinito en $+X$ y cuenta las intersecciones con las aristas del polígono: un número impar de cruces indica que el punto se encuentra en el interior, mientras que un número par indica que está en el exterior.
 
 ---
 
