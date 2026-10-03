@@ -9,8 +9,8 @@
 //   D / I            -> rotar 5 grados derecha / izquierda
 //   S / s            -> escalar +10% / -10%
 //   Flechas          -> trasladar (5 px por pulsacion, 20 con Shift)
-//   r / g / b        -> cambiar color de relleno del activo
-//   P                -> rellenar poligono activo
+//   R/r, G/g, B/b    -> ajustar canal de color (+/- 0.2) y rellenar
+//   v / V            -> vaciar relleno del activo (modo alambrico)
 //   C                -> limpiar todo
 //   ESC              -> salir
 // =====================================================================
@@ -430,28 +430,37 @@ void teclado(unsigned char tecla, int x, int y) {
   if (tecla == 's' && poligonos[poligonoActivo].cerrado)
     escalar(poligonos[poligonoActivo], 0.90f);
 
-  // -------- Color de relleno del activo --------
-  if (tecla == 'r') {
-    poligonos[poligonoActivo].R = 1;
-    poligonos[poligonoActivo].G = 0;
-    poligonos[poligonoActivo].B = 0;
-  }
-  if (tecla == 'g') {
-    poligonos[poligonoActivo].R = 0;
-    poligonos[poligonoActivo].G = 1;
-    poligonos[poligonoActivo].B = 0;
-  }
-  if (tecla == 'b') {
-    poligonos[poligonoActivo].R = 0;
-    poligonos[poligonoActivo].G = 0;
-    poligonos[poligonoActivo].B = 1;
-  }
-
-  // -------- Rellenar el poligono activo --------
-  if (tecla == 'p' || tecla == 'P') {
-    if (poligonos[poligonoActivo].cerrado) {
+  // -------- Color de relleno (pasos de 0.2) y activacion automatica --------
+  if (poligonos[poligonoActivo].cerrado) {
+    if (tecla == 'R') {
+      poligonos[poligonoActivo].R = min(1.0f, poligonos[poligonoActivo].R + 0.2f);
       poligonos[poligonoActivo].relleno = true;
-      cout << "Poligono " << poligonoActivo + 1 << " rellenado." << endl;
+    }
+    if (tecla == 'r') {
+      poligonos[poligonoActivo].R = max(0.0f, poligonos[poligonoActivo].R - 0.2f);
+      poligonos[poligonoActivo].relleno = true;
+    }
+    if (tecla == 'G') {
+      poligonos[poligonoActivo].G = min(1.0f, poligonos[poligonoActivo].G + 0.2f);
+      poligonos[poligonoActivo].relleno = true;
+    }
+    if (tecla == 'g') {
+      poligonos[poligonoActivo].G = max(0.0f, poligonos[poligonoActivo].G - 0.2f);
+      poligonos[poligonoActivo].relleno = true;
+    }
+    if (tecla == 'B') {
+      poligonos[poligonoActivo].B = min(1.0f, poligonos[poligonoActivo].B + 0.2f);
+      poligonos[poligonoActivo].relleno = true;
+    }
+    if (tecla == 'b') {
+      poligonos[poligonoActivo].B = max(0.0f, poligonos[poligonoActivo].B - 0.2f);
+      poligonos[poligonoActivo].relleno = true;
+    }
+
+    // -------- Vaciar relleno (modo alambrico) --------
+    if (tecla == 'v' || tecla == 'V') {
+      poligonos[poligonoActivo].relleno = false;
+      cout << "Poligono " << poligonoActivo + 1 << " vaciado (modo alambrico)." << endl;
     }
   }
 

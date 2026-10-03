@@ -34,8 +34,10 @@ g++ -std=c++17 main.cpp -o main -lglut -lGLU -lGL
 | **Escalamiento** | Tecla `S` | Incrementa el tamaño del polígono activo en un $+10\%$ respecto a su centroide. |
 | | Tecla `s` | Reduce el tamaño del polígono activo en un $-10\%$ respecto a su centroide. |
 | **Traslación** | `Flechas` (←, →, ↑, ↓) | Desplaza el polígono activo $5\text{ px}$ en la dirección indicada. |
-| **Color de relleno** | Teclas `r`, `g`, `b` | Asigna el color de relleno del polígono activo (Rojo, Verde o Azul). |
-| **Rellenar polígono** | Tecla `p` / `P` | Activa el algoritmo de relleno Scan-Line para el polígono activo. |
+| **Canal Rojo (R)** | Tecla `R` (+0.2) / `r` (-0.2) | Ajusta el canal rojo del polígono activo y activa el relleno automáticamente. |
+| **Canal Verde (G)** | Tecla `G` (+0.2) / `g` (-0.2) | Ajusta el canal verde del polígono activo y activa el relleno automáticamente. |
+| **Canal Azul (B)** | Tecla `B` (+0.2) / `b` (-0.2) | Ajusta el canal azul del polígono activo y activa el relleno automáticamente. |
+| **Vaciar relleno** | Tecla `v` / `V` | Desactiva el relleno del polígono activo (vuelve a modo alámbrico). |
 | **Limpiar escena** | Tecla `c` / `C` | Elimina todos los polígonos y reinicia el lienzo. |
 | **Salir** | Tecla `ESC` | Finaliza la aplicación. |
 
